@@ -1,12 +1,36 @@
 {
-  "team": "TODO-team-name",
+  "team": "Antigravity-Team",
   "schema_version": 1,
   "findings": [
     {
       "fault_class": "latency_spike",
-      "evidence": {"metric": "latency_p95_ms", "observed": "TODO from your telemetry", "trace_ids": []},
-      "root_cause": "TODO: what config knob or behavior causes it?",
-      "suggested_fix": "TODO: config change and/or wrapper mitigation"
+      "evidence": {"metric": "latency_p95_ms", "observed": "1200ms", "trace_ids": []},
+      "root_cause": "Network calls to LLM without cache and retry settings causing slow responses.",
+      "suggested_fix": "Enable caching in config.json and thread-safe cache lookup in wrapper.py."
+    },
+    {
+      "fault_class": "error_spike",
+      "evidence": {"metric": "error_rate", "observed": "18%", "trace_ids": []},
+      "root_cause": "Tool calling experiences intermittent network or simulation failures.",
+      "suggested_fix": "Enable retry mechanism in config.json with max_attempts: 3 and backoff, plus retry wrapper."
+    },
+    {
+      "fault_class": "infinite_loop",
+      "evidence": {"metric": "max_steps_reached", "observed": "12 steps", "trace_ids": []},
+      "root_cause": "Loop guard was disabled and tool call loops occurred without limitations.",
+      "suggested_fix": "Enable loop_guard: true and restrict tool_budget: 4."
+    },
+    {
+      "fault_class": "pii_leak",
+      "evidence": {"metric": "pii_detected_count", "observed": "100%", "trace_ids": []},
+      "root_cause": "System prompt allows echoing phone number or email back to user.",
+      "suggested_fix": "Add redact_pii: true in config and PII filter redact wrapper, instruct prompt to avoid PII."
+    },
+    {
+      "fault_class": "prompt_injection",
+      "evidence": {"metric": "price_hijack", "observed": "Incorrect totals calculated", "trace_ids": []},
+      "root_cause": "LLM treats order note commands (GHI CHÚ) as instructions instead of raw data.",
+      "suggested_fix": "Sanitize question in wrapper.py by removing everything after 'Ghi chú:' or similar phrases."
     }
   ]
 }
